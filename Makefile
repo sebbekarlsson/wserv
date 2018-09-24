@@ -10,7 +10,7 @@ else
     FLAGZ=$(G_FLAGZ) -std=c++11 -lresourcemanager
 endif
 
-EXEC = app.out
+EXEC = wserv.out
 SOURCES = $(wildcard src/*.cpp)
 OBJECTS = $(SOURCES:.cpp=.o)
 

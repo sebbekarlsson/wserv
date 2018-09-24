@@ -1,6 +1,9 @@
 #include "includes/Server.hpp"
 
-Server::Server() {};
+
+Server::Server(std::string directory) {
+    this->directory = directory;
+};
 
 
 size_t split(const std::string &txt, std::vector<std::string> &strs, char ch)
@@ -22,6 +25,23 @@ size_t split(const std::string &txt, std::vector<std::string> &strs, char ch)
 
     return strs.size();
 }
+
+std::string Server::gen_header(int content_length) {
+    std::string headers = "";
+
+    headers = headers + "HTTP/1.1 200 OK\n";
+    headers = headers + "Date: Mon, 23 May 2005 22:38:34 GMT\n";
+    headers = headers + "Content-Type: text/html; charset=UTF-8\n";
+    headers = headers + "Content-Length: " + std::to_string(content_length) + "\n";
+    headers = headers + "Last-Modified: Wed, 08 Jan 2003 23:11:55 GMT\n";
+    headers = headers + "Server: wserv (Unix) (Linux)\n";
+    headers = headers + "ETag: \"3f80f-1b6-3e1cb03b\"\n";
+    headers = headers + "Accept-Ranges: bytes\n";
+    headers = headers + "Connection: close\n";
+    headers = headers + "\n";
+
+    return headers;
+};
 
 
 std::string Server::get_route(std::string client_message) {
@@ -45,9 +65,6 @@ std::string Server::get_route(std::string client_message) {
 };
 
 int Server::start() {
-    ResourceManager::load("response.txt");
-    std::string msg = ResourceManager::get("response.txt");
-
     int socket_desc , client_sock , c , read_size;
     struct sockaddr_in server , client;
     char client_message[2000];
@@ -89,10 +106,21 @@ int Server::start() {
         // Receive a message from client
         while ((read_size = read(client_sock , client_message , sizeof(client_message))) > 0) {
             //Send the message back to client
-            std::string route = this->get_route(std::string(client_message));
-            ResourceManager::load(route);
+            std::string headers = "";
+            std::string msg = "";
+            std::string route = this->directory + "/" + this->get_route(std::string(client_message));
 
-            write(client_sock , ResourceManager::get(route).c_str(), strlen(msg.c_str()));
+            if (ResourceManager::fileExists(route)) {
+                ResourceManager::load(route);
+                msg = ResourceManager::get(route);
+            } else {
+                msg = "<html><title>404</title></html>";
+            }
+
+            headers = this->gen_header(msg.length());
+            msg = headers + msg;
+
+            write(client_sock , msg.c_str(), strlen(msg.c_str()));
             memset( &client_message, 0, sizeof(client_message));
         }
 
@@ -100,9 +128,9 @@ int Server::start() {
             puts("Client disconnected");
             fflush(stdout);
         }
-        else if(read_size == -1) {
+        
+        else if(read_size == -1)
             perror("recv failed");
-        }
     }
 
     return 0;
