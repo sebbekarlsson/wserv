@@ -27,6 +27,9 @@ std::string ArgumentParser::get_argument(std::string key) {
         std::string _key = this->argv[i];
         std::string value = this->argv[i+1];
 
+        if (std::find(this->arguments.begin(), this->arguments.end(), _key) == this->arguments.end())
+            throw std::runtime_error("Invalid argument: " + _key);
+
         if (_key == key)
             return value;
 
