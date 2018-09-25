@@ -1,7 +1,8 @@
 #include "includes/Server.hpp"
 
 
-Server::Server(std::string directory) {
+Server::Server(int port, std::string directory) {
+    this->port = port;
     this->directory = directory;
 };
 
@@ -78,7 +79,7 @@ int Server::start() {
 
     server.sin_family = AF_INET;
     server.sin_addr.s_addr = INADDR_ANY;
-    server.sin_port = htons( 2000 );
+    server.sin_port = htons( this->port );
 
     // Bind
     if (bind(socket_desc,(struct sockaddr *)&server , sizeof(server)) < 0) {
@@ -119,6 +120,8 @@ int Server::start() {
 
             headers = this->gen_header(msg.length());
             msg = headers + msg;
+
+            std::cout << "REQUEST FOR: " << route << std::endl;
 
             write(client_sock , msg.c_str(), strlen(msg.c_str()));
             memset( &client_message, 0, sizeof(client_message));

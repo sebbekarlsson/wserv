@@ -10,10 +10,12 @@
 
 class Server {
     public:
-        Server(std::string directory);
+        Server(int port, std::string directory);
 
         std::string get_route(std::string client_message);
         std::string gen_header(int content_length);
+
+        int port;
 
         std::string directory;
 

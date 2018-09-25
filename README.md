@@ -7,6 +7,4 @@
 ## Usage
 > Compile using `make` and then run:
 
-    ./wserv.out <path-to-directory-to-serve>
-
-> Currently hardcoded to serve on port `2000`
+    ./wserv.out --port <port> --directory /path/to/dir/to/serve
